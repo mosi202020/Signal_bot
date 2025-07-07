@@ -1,26 +1,36 @@
+
+from flask import Flask, request
 import os
 import requests
-import time
-from telegram import Bot
 
-TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+app = Flask(__name__)
 
-SYMBOL = 'XAUUSDT'
-INTERVAL = '60m'
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHANNEL_ID = os.environ.get("CHANNEL_ID")
 
-bot = Bot(token=TELEGRAM_TOKEN)
-last_signal = None
+@app.route("/")
+def index():
+    return "✅ Bot is running"
 
-def send_signal(message):
-    bot.send_message(chat_id=CHAT_ID, text=message)
+@app.route("/send")
+def send_signal():
+    text = request.args.get("text")
+    if not text:
+        return "❌ No text provided", 400
 
-def get_klines(symbol, interval, limit=100):
-    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}'
-    response = requests.get(url)
-    data = response.json()
-    return data
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": CHANNEL_ID,
+        "text": text,
+        "parse_mode": "HTML"
+    }
 
-def calculate_ema(prices, window):
-    ema_values = []
-    k =
+    r = requests.post(url, json=payload)
+
+    if r.status_code == 200:
+        return "✅ Message sent"
+    else:
+        return f"❌ Failed: {r.text}", 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
