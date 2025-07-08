@@ -29,7 +29,7 @@ def main():
             bot.send_message(chat_id=CHAT_ID, text=message)
         except Exception as e:
             print(f"خطا: {e}")
-        sleep(10800)  # هر ۳ ساعت
+        sleep(10800)
 
 if __name__ == "__main__":
     main()
